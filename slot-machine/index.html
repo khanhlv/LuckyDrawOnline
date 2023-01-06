@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>VPBank NEO</title>
+	<meta charset="utf-8" />
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+	
+	<link rel="stylesheet" href="assets/css/sweetalert2.min.css">
+	
+	<script src="assets/js/sweetalert2.all.min.js"></script>
+	<script src="assets/js/howler.js"></script>
+	
+	<style>
+		html,
+		body {
+			width: 100vw;
+			height: 100vh;
+			margin: 0;
+			border: 0;
+			padding: 0;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+			font-family: arial,sans-serif;
+		}
+
+		*,
+		*::before,
+		*::after {
+			-webkit-box-sizing: inherit;
+			-moz-box-sizing: inherit;
+			box-sizing: inherit;
+		}
+
+		#app {
+			width: 100%;
+			height: 100%;
+			background: #212121;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			background-size: 100%;
+			background-image: url('assets/img/BG-01.png')
+		}
+
+		.doors {
+			display: flex;
+		}
+
+		.door {
+			background: #fafafa;
+			/* box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.4) inset; */
+			width: 100px;
+			height: 150px;
+			overflow: hidden;
+			border-radius: 1ex;
+			margin: 1ch;
+		}
+
+		.boxes {
+			/* transform: translateY(0); */
+			transition: transform 1s ease-in-out;
+		}
+
+		.box {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			font-size: 4rem;
+			color: green;
+			font-weight: bold;
+		}
+
+		.buttons {
+			margin: 1rem 0 2rem 0;
+		}
+
+		button {
+			cursor: pointer;
+			font-size: 12px;
+			text-transform: uppercase;
+			margin: 0 0.2rem 0 0.2rem;
+			border-radius: 15px;
+			padding: 10px;
+			color: #fff;
+			border-color:#00b74f;
+			background: #00b74f;
+			text-shadow: 0 -1px 0 rgb(0 0 0 / 12%);
+			box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+		}
+		
+		.info {
+			width: 150px;
+			border: 2px dotted #8af906;
+			text-align: center;
+			color: white;
+			font-weight: bold;
+			font-size: 25px;
+			position: fixed;
+			left: 25px;
+			top: 65px;
+		}
+		
+		.info p {
+			border-bottom: 2px dotted #8af906;
+			padding: 5px;
+			margin: 0px;
+		}
+		
+		.swal2-container.swal2-backdrop-show, .swal2-container.swal2-noanimation, .swal2-container.swal2-backdrop-hide {
+			background: url('assets/img/BG-01.png') !important;
+			background-size: 100% !important;
+		}
+		
+		.item {
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div id="app">
+		<div style="color: #f3dc97;font-size: 70px;font-weight: bold;text-transform: uppercase;margin-bottom: 40px;position: fixed;top: 50px;">
+			LUCKY DRAW
+		</div>
+		<div class="doors">
+			<div class="door">
+				<div class="boxes">
+					<!-- <div class="box">?</div> -->
+				</div>
+			</div>
+
+			<div class="door">
+				<div class="boxes">
+					<!-- <div class="box">?</div> -->
+				</div>
+			</div>
+
+			<div class="door">
+				<div class="boxes">
+					<!-- <div class="box">?</div> -->
+				</div>
+			</div>
+		</div>
+
+		<div class="buttons">
+			<button id="spinner">Start</button>
+			<button style="display: none" id="reseter">Reset</button>
+		</div>
+		
+		<div class="info" id="info">
+			<div id="dataList"></div>
+			<button id="clearData" style="margin: 10px;padding: 5px;">Clear ALL</button>
+		</div>
+		
+	</div>
+
+	<script>
+		let lisResultDeleteStore = [];
+		let lisResultStore = [];
+		
+		function removeItem(v) {
+			console.log(v);
+			
+			lisResultDeleteStore.push(v);
+				
+			localStorage.setItem('resultListDelete', JSON.stringify(lisResultDeleteStore));
+			
+			showResult();
+		}
+		
+		function arrayRemove(arr, value) { 
+			return arr.filter(function(ele){ 
+				return ele != value; 
+			});
+		}
+		
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		
+		const items = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+		
+		let lookupTBL = new Array(
+				'EHD',
+				'OGY',
+				'DNK',
+				'EWG',
+				'ZDE',
+				'EGP',
+				'EML',
+				'AWN',
+				'EXH',
+				'ZHC',
+				'BJF',
+				'OWF',
+				'EJV',
+				'OTV',
+				'DJR',
+				'CND',
+				'CWC',
+				'AND',
+				'NHA',
+				'MM4',
+				'OGW',
+				'ETH',
+				'OHJ',
+				'MDV',
+				'DHD',
+				'DW4',
+				'AMQ',
+				'AHL',
+				'CW4',
+				'A3R',
+				'MWP',
+				'NJA',
+				'YJB',
+				'AXZ',
+				'Y3Z',
+				'A3Y',
+				'DWE',
+				'NML',
+				'EGI',
+				'B3M',
+				'ZWT',
+				'M2X',
+				'MTF',
+				'ATB',
+				'BTF',
+				'BDL',
+				'Y3O',
+				'NJD',
+				'CWX',
+				'C3R',
+				'ENF',
+				'OGL',
+				'MDB',
+				'B2V',
+				'ZW4',
+				'Z2I',
+				'B3H',
+				'OG9',
+				'AX3',
+				'EJR',
+				'ND6',
+				'ZTM',
+				'NNB',
+				'OTN',
+				'DXF',
+				'M3Z',
+				'ZNL',
+				'ZGH',
+				'EWD',
+				'ENK',
+				'DZL',
+				'BHD',
+				'DHK',
+				'BZM',
+				'Z2O',
+				'YJU',
+				'BGD',
+				'NDN',
+				'Y2L',
+				'CMS',
+				'EXN',
+				'BNB',
+				'BHF',
+				'AXF',
+				'CHN',
+				'EME',
+				'M3D',
+				'B5V',
+				'C2E',
+				'BHZ',
+				'MJF',
+				'D3F',
+				'EGS');
+		
+		function showResult() {
+			if (localStorage.getItem('resultList') != null) {
+				document.querySelector("#info").style.display = 'block';
+				lisResultStore = JSON.parse(localStorage.getItem('resultList'));
+				
+				if (lisResultStore.length == 0) {
+					document.querySelector("#info").style.display = 'none';
+				}
+				
+				if (localStorage.getItem('resultListDelete') != null) {
+					lisResultDeleteStore = JSON.parse(localStorage.getItem('resultListDelete'));
+					
+					lisResultDeleteStore.forEach(function(v) {
+						lookupTBL = arrayRemove(lookupTBL, v);
+						lisResultStore = arrayRemove(lisResultStore, v);
+					});
+				}
+				
+				var html = '';
+				lisResultStore.forEach(function(v) {
+					html += '<p class="item" onclick="removeItem(\''+ v +'\')">' + v + '</p>';
+					lookupTBL = arrayRemove(lookupTBL, v);
+				});
+				
+				document.querySelector("#dataList").innerHTML = html;
+			} else {
+				document.querySelector("#info").style.display = 'none';
+			}
+		}
+		
+		showResult();
+		
+		const doors = document.querySelectorAll(".door");
+
+		document.querySelector("#spinner").addEventListener("click", spin);
+		document.querySelector("#reseter").addEventListener("click", init);
+		
+		document.querySelector("#clearData").addEventListener("click", function() {
+			localStorage.setItem('resultList', '[]');
+			localStorage.setItem('resultListDelete', '[]');
+			
+			showResult();
+			
+			location.reload();
+		});
+
+		let result = [];
+		
+		function init(firstInit = true, groups = 1, duration = 1) {
+			let count = 0;
+			for (const door of doors) {
+				
+				if (firstInit) {
+					door.dataset.spinned = "0";
+				} else if (door.dataset.spinned === "1") {
+					return;
+				}
+
+				const boxes = door.querySelector(".boxes");
+				const boxesClone = boxes.cloneNode(false);
+				const pool = ["?"];
+
+				if (!firstInit) {
+					const arr = [];
+					for (let n = 0; n < (groups > 0 ? groups : 1); n++) {
+						arr.push(...items);
+					}
+					pool.push(...shuffle(arr));
+
+					boxesClone.addEventListener(
+						"transitionstart",
+						function () {
+							door.dataset.spinned = "1";
+							this.querySelectorAll(".box").forEach((box) => {
+								box.style.filter = "blur(1px)";
+							});
+						},
+						{ once: true }
+					);
+
+					boxesClone.addEventListener(
+						"transitionend",
+						function () {
+							this.querySelectorAll(".box").forEach((box, index) => {
+								box.style.filter = "blur(0)";
+								if (index > 0) this.removeChild(box);
+							});
+						},
+						{ once: true }
+					);
+				}
+				
+				for (let i = pool.length - 1; i >= 0; i--) {
+					const box = document.createElement("div");
+					box.classList.add("box");
+					box.style.width = door.clientWidth + "px";
+					box.style.height = door.clientHeight + "px";
+					box.textContent = pool[i];
+					
+					if (i == 36) {
+						box.textContent = result[count];
+						count++;
+					}
+					boxesClone.appendChild(box);
+				}
+				
+				boxesClone.style.transitionDuration = `${duration > 0 ? duration : 1}s`;
+				boxesClone.style.transform = `translateY(-${door.clientHeight * (pool.length - 1)}px)`;
+				door.replaceChild(boxesClone, boxes);
+			}
+		}
+
+		async function spin() {
+			document.querySelector("#reseter").click();
+			
+			result = [];
+			const r = getRandomInt(0, lookupTBL.length-1);
+			
+			const resultItem = lookupTBL[r];
+			
+			lisResultStore.push(resultItem);
+			
+			localStorage.setItem('resultList', JSON.stringify(lisResultStore));
+			
+			result.push(resultItem.substring(0, 1));
+			result.push(resultItem.substring(1, 2));
+			result.push(resultItem.substring(2, 3));
+			
+			console.log(resultItem, result, lookupTBL.length);
+			
+			const sound = new Howl({
+				src: ['assets/data.mp3'],
+				loop: true,
+			});
+			
+			init(false, 1, 6);
+			
+			sound.play();
+			
+			document.querySelector("#spinner").style.display = 'none';
+			
+			for (const door of doors) {
+				const boxes = door.querySelector(".boxes");
+				const duration = parseInt(boxes.style.transitionDuration);
+				boxes.style.transform = "translateY(0)";
+				await new Promise((resolve) => setTimeout(resolve, duration * 600));
+			}
+			
+			setTimeout(function() {
+				Swal.fire({
+					icon: 'success',
+					title:  'Mã trúng thưởng: ' + resultItem,
+					showConfirmButton: true
+				})
+				document.querySelector("#spinner").style.display = 'block';
+				showResult();
+				
+				sound.stop();
+			}, 4 * 600);
+		}
+
+		function shuffle([...arr]) {
+			let m = arr.length;
+			while (m) {
+				const i = Math.floor(Math.random() * m--);
+				[arr[m], arr[i]] = [arr[i], arr[m]];
+			}
+			return arr;
+		}
+
+		init();
+		
+	</script>
+</body>
+</html>
